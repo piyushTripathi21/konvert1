@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y \
     fonts-crosextra-carlito \
     fonts-crosextra-caladea \
     --no-install-recommends && \
+    echo "a4" > /etc/papersize && \
     rm -rf /var/lib/apt/lists/*
 
 # Set up Python virtual environment and install pdf2docx and openpyxl packages

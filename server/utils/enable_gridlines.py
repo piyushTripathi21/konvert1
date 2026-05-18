@@ -69,7 +69,7 @@ def main():
                     sheet.sheet_properties.pageSetUpPr.fitToPage = True
                 
                 sheet.page_setup.fitToWidth = 1
-                sheet.page_setup.fitToHeight = 1
+                sheet.page_setup.fitToHeight = 0 # 0 / None allows natural vertical flow without shrinking fonts!
                 sheet.page_setup.paperSize = 9 # XL_PAPERSIZE_A4
                 
                 # Dynamically choose landscape orientation if table is wide (improves fitting!)

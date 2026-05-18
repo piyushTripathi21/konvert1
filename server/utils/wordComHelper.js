@@ -154,13 +154,6 @@ async function libreOfficeConvert(inputPath, outputPath) {
   // Command to invoke headless LibreOffice with low-memory and speed-optimized parameters
   // Essential for Render's 512MB RAM Free Tier to prevent Out of Memory (OOM) crashes
   let exportFilter = 'pdf';
-  if (currentExt === '.xlsx' || currentExt === '.xls') {
-    // Use LibreOffice's built-in calc_pdf_Export filter with SinglePageSheets option enabled.
-    // Wrap in single quotes on Linux to prevent bash/sh from stripping the double quotes inside the JSON string!
-    exportFilter = IS_WINDOWS 
-      ? 'pdf:calc_pdf_Export:{\\"SinglePageSheets\\":{\\"type\\":\\"boolean\\",\\"value\\":\\"true\\"}}' 
-      : "pdf:calc_pdf_Export:{\"SinglePageSheets\":{\"type\":\"boolean\",\"value\":\"true\"}}";
-  }
 
   const convertArg = IS_WINDOWS ? `"${exportFilter}"` : `'${exportFilter}'`; // wrap in single quotes on Linux
   const cmd = `libreoffice --headless --invisible --nodefault --nofirststartwizard --nolockcheck --nologo --norestore --convert-to ${convertArg} --outdir "${absOutputDir}" "${currentInput}"`;
@@ -256,7 +249,7 @@ async function excelToPdfConvert(inputPath, outputPath) {
     '$wb.Worksheets | ForEach-Object { $_.Cells.EntireColumn.AutoFit() }',
     '$wb.Worksheets | ForEach-Object { $_.PageSetup.PrintGridlines = $true }',
     '$wb.Worksheets | ForEach-Object { $_.PageSetup.PaperSize = 9 }', // xlPaperA4
-    '$wb.Worksheets | ForEach-Object { $_.PageSetup.Zoom = $false; $_.PageSetup.FitToPagesWide = 1; $_.PageSetup.FitToPagesTall = 1 }',
+    '$wb.Worksheets | ForEach-Object { $_.PageSetup.Zoom = $false; $_.PageSetup.FitToPagesWide = 1; $_.PageSetup.FitToPagesTall = $false }',
     `$wb.ExportAsFixedFormat(0, "${absOutput}")`,
     '$wb.Close($false)',
     'Write-Output "OK"',
