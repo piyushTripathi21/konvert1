@@ -1,15 +1,11 @@
 import { Link } from 'react-router-dom';
-import ToolCard from '../components/ui/ToolCard';
-import {
-  mergePdfs, splitPdf, compressPdf, rotatePdf,
-  watermarkPdf, paginatePdf, protectPdf, unlockPdf, imagesToPdf, pdfToWord
-} from '../services/api';
 import './Home.css';
 
 const tools = [
   {
     title: 'Merge PDF',
     color: '#e2514a',
+    path: '/merge',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="6" y="8" width="14" height="18" rx="2" fill="white" fillOpacity="0.9"/>
@@ -18,14 +14,11 @@ const tools = [
       </svg>
     ),
     description: 'Combine multiple PDFs into one unified document.',
-    fields: [
-      { name: 'files', type: 'file', accept: '.pdf', multiple: true, required: true },
-    ],
-    apiCall: (data) => mergePdfs(data.files),
   },
   {
     title: 'PDF to Word',
-    color: '#005a9c', // Word blue
+    color: '#005a9c',
+    path: '/pdf-to-word',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M26 8v32l-14 4V4l14 4z" fill="white" fillOpacity="0.8"/>
@@ -33,15 +26,38 @@ const tools = [
         <path d="M12 18l3 12h2l2-7 2 7h2l3-12h-2l-2 9-2-7h-2l-2 7-2-9h-2z" fill="white"/>
       </svg>
     ),
-    description: 'Convert PDF to an editable Word document containing text and images.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-    ],
-    apiCall: (data) => pdfToWord(data.file),
+    description: 'Convert PDF to an editable Word document.',
+  },
+  {
+    title: 'Word to PDF',
+    color: '#2a5699',
+    path: '/word-to-pdf',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <path d="M14 16h20M14 24h20M14 32h12" stroke="#2a5699" strokeWidth="2.5" strokeLinecap="round"/>
+        <path d="M30 32l6 6M36 32l-6 6" stroke="#2a5699" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    description: 'Convert Microsoft Word documents to PDF.',
+  },
+  {
+    title: 'Excel to PDF',
+    color: '#1d6f42',
+    path: '/excel-to-pdf',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <path d="M14 14h20M14 20h20M14 26h20M14 32h20" stroke="#1d6f42" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M20 14v18M28 14v18" stroke="#1d6f42" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    description: 'Convert Excel spreadsheets to PDF tables.',
   },
   {
     title: 'Split PDF',
     color: '#4a90e2',
+    path: '/split',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
@@ -50,40 +66,23 @@ const tools = [
       </svg>
     ),
     description: 'Extract specific pages by range.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-      { name: 'ranges', type: 'text', placeholder: 'e.g., 1-3,5,8-10' },
-    ],
-    apiCall: (data) => splitPdf(data.file, data.ranges),
   },
   {
     title: 'Compress PDF',
     color: '#2ecc71',
+    path: '/compress',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
         <path d="M18 18l6 6 6-6M18 28l6-6 6 6" stroke="#2ecc71" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
-    description: 'Reduce file size by recompressing embedded images.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-      {
-        name: 'level',
-        type: 'select',
-        options: [
-          { value: 'screen',   label: 'Maximum Compression' },
-          { value: 'ebook',    label: 'Recommended' },
-          { value: 'printer',  label: 'Good Quality' },
-          { value: 'prepress', label: 'Best Quality' },
-        ],
-      },
-    ],
-    apiCall: (data) => compressPdf(data.file, data.level),
+    description: 'Reduce file size by recompressing images.',
   },
   {
     title: 'Rotate PDF',
     color: '#f39c12',
+    path: '/rotate',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="10" y="10" width="28" height="28" rx="3" fill="white" fillOpacity="0.9"/>
@@ -92,23 +91,11 @@ const tools = [
       </svg>
     ),
     description: 'Rotate all pages by a given angle.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-      {
-        name: 'degrees',
-        type: 'select',
-        options: [
-          { value: '90', label: '90°' },
-          { value: '180', label: '180°' },
-          { value: '270', label: '270°' },
-        ],
-      },
-    ],
-    apiCall: (data) => rotatePdf(data.file, data.degrees),
   },
   {
     title: 'Watermark',
     color: '#9b59b6',
+    path: '/watermark',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
@@ -116,15 +103,11 @@ const tools = [
       </svg>
     ),
     description: 'Add a text watermark to every page.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-      { name: 'text', type: 'text', placeholder: 'Watermark text' },
-    ],
-    apiCall: (data) => watermarkPdf(data.file, data.text),
   },
   {
     title: 'Page Numbers',
     color: '#1abc9c',
+    path: '/page-numbers',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
@@ -135,14 +118,11 @@ const tools = [
       </svg>
     ),
     description: 'Add page numbers to the bottom right.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-    ],
-    apiCall: (data) => paginatePdf(data.file),
   },
   {
     title: 'Protect PDF',
     color: '#e74c3c',
+    path: '/protect',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M24 6L10 12v12c0 8 6 15 14 18 8-3 14-10 14-18V12L24 6z" fill="white" fillOpacity="0.9"/>
@@ -151,15 +131,11 @@ const tools = [
       </svg>
     ),
     description: 'Encrypt your PDF with a password.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-      { name: 'password', type: 'password', placeholder: 'Password', required: true },
-    ],
-    apiCall: (data) => protectPdf(data.file, data.password),
   },
   {
     title: 'Unlock PDF',
     color: '#e67e22',
+    path: '/unlock',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="12" y="22" width="24" height="18" rx="3" fill="white" fillOpacity="0.9"/>
@@ -168,15 +144,11 @@ const tools = [
       </svg>
     ),
     description: 'Remove password protection from PDF.',
-    fields: [
-      { name: 'file', type: 'file', accept: '.pdf', required: true },
-      { name: 'password', type: 'password', placeholder: 'Known password' },
-    ],
-    apiCall: (data) => unlockPdf(data.file, data.password),
   },
   {
     title: 'Images → PDF',
     color: '#3498db',
+    path: '/images-to-pdf',
     icon: (
       <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="6" y="10" width="24" height="20" rx="3" fill="white" fillOpacity="0.8"/>
@@ -186,10 +158,119 @@ const tools = [
       </svg>
     ),
     description: 'Convert images to a single PDF.',
-    fields: [
-      { name: 'images', type: 'file', accept: 'image/*', multiple: true, required: true },
-    ],
-    apiCall: (data) => imagesToPdf(data.images),
+  },
+  {
+    title: 'Edit PDF',
+    color: '#8e44ad',
+    path: '/edit-pdf',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <path d="M30 14l4 4-12 12H18v-4l12-12z" fill="#8e44ad" opacity="0.85"/>
+        <path d="M14 38h20" stroke="#8e44ad" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    ),
+    description: 'Open a PDF and add or edit text directly.',
+  },
+  {
+    title: 'Reorder Pages',
+    color: '#f39c12',
+    path: '/reorder',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <path d="M16 16h16M16 24h16M16 32h16" stroke="#f39c12" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M12 16l-3 3 3 3M36 24l3-3-3-3M12 32l-3 3 3 3" stroke="#f39c12" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    description: 'Reorder or delete pages from your PDF.',
+  },
+  {
+    title: 'Extract Text',
+    color: '#2ecc71',
+    path: '/extract',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <path d="M16 16h16M16 22h12M16 28h14" stroke="#2ecc71" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M30 32l6 6M36 32l-6 6" stroke="#2ecc71" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    ),
+    description: 'Extract all text from a PDF as a .txt file.',
+  },
+  {
+    title: 'Metadata',
+    color: '#9b59b6',
+    path: '/metadata',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <circle cx="24" cy="18" r="4" fill="#9b59b6" opacity="0.7"/>
+        <path d="M14 34h20M14 28h20" stroke="#9b59b6" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    ),
+    description: 'Edit title, author, subject, and keywords.',
+  },
+  {
+    title: 'PDF → Images',
+    color: '#3498db',
+    path: '/pdf-to-images',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <circle cx="18" cy="18" r="4" fill="#3498db" opacity="0.6"/>
+        <path d="M12 34l8-10 6 7 4-5 6 8" stroke="#3498db" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    description: 'Split PDF into individual page images.',
+  },
+  {
+    title: 'AI Summarizer',
+    color: '#667eea',
+    path: '/ai-summarizer',
+    isAi: true,
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <path d="M16 16h16M16 22h12M16 28h14" stroke="#667eea" strokeWidth="2" strokeLinecap="round"/>
+        <circle cx="34" cy="34" r="8" fill="#667eea"/>
+        <text x="34" y="37.5" textAnchor="middle" fontSize="10" fontWeight="bold" fill="white" fontFamily="Inter,sans-serif">✦</text>
+      </svg>
+    ),
+    description: 'AI-powered summary of any PDF in seconds.',
+  },
+  {
+    title: 'AI Translator',
+    color: '#764ba2',
+    path: '/ai-translator',
+    isAi: true,
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
+        <text x="18" y="24" fontSize="11" fontWeight="bold" fill="#764ba2" fontFamily="Inter,sans-serif">A</text>
+        <path d="M24 20l4 0" stroke="#764ba2" strokeWidth="2" strokeLinecap="round"/>
+        <text x="32" y="34" fontSize="11" fontWeight="bold" fill="#764ba2" fontFamily="Inter,sans-serif" opacity="0.7">अ</text>
+        <circle cx="34" cy="34" r="8" fill="#764ba2"/>
+        <text x="34" y="37.5" textAnchor="middle" fontSize="10" fontWeight="bold" fill="white" fontFamily="Inter,sans-serif">🌐</text>
+      </svg>
+    ),
+    description: 'Translate PDF content to any language using AI.',
+  },
+  {
+    title: 'Image Editor',
+    color: '#0ea5e9',
+    path: '/image-editor',
+    icon: (
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="8" width="36" height="28" rx="3" fill="white" fillOpacity="0.9"/>
+        <circle cx="17" cy="19" r="4" fill="#0ea5e9" opacity="0.7"/>
+        <path d="M6 28l10-10 8 8 6-6 10 8" stroke="#0ea5e9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <rect x="14" y="38" width="20" height="3" rx="1.5" fill="white" fillOpacity="0.7"/>
+        <circle cx="38" cy="10" r="6" fill="#0ea5e9"/>
+        <path d="M35 10h6M38 7v6" stroke="white" strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    ),
+    description: 'Remove backgrounds, resize, and convert images — all in-browser.',
   },
 ];
 
@@ -209,22 +290,25 @@ export default function Home() {
       <section className="tools-section">
         <div className="tools-grid">
           {tools.map((tool) => (
-            <ToolCard key={tool.title} {...tool} />
+            <Link
+              key={tool.title}
+              to={tool.path}
+              className={`tool-card tool-card-link${tool.isAi ? ' tool-card-ai' : ''}`}
+              style={{ '--card-color': tool.color, textDecoration: 'none' }}
+            >
+              {tool.isAi && <span className="tool-ai-tag">✨ AI</span>}
+              <div className="tool-icon-box">
+                {tool.icon}
+              </div>
+              <h3>{tool.title}</h3>
+              <p className="tool-description">{tool.description}</p>
+              <div className="tool-card-arrow">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M7 4l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </Link>
           ))}
-
-          {/* Edit PDF — links to dedicated editor */}
-          <Link to="/edit-pdf" className="tool-card edit-pdf-link" style={{ '--card-color': '#8e44ad', textDecoration: 'none' }}>
-            <div className="tool-icon-box">
-              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="8" y="6" width="32" height="36" rx="3" fill="white" fillOpacity="0.9"/>
-                <path d="M30 14l4 4-12 12H18v-4l12-12z" fill="#8e44ad" opacity="0.85"/>
-                <path d="M14 38h20" stroke="#8e44ad" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <h3>Edit PDF</h3>
-            <p className="tool-description">Open a PDF and add or edit text directly on any page.</p>
-            <div className="edit-pdf-badge">Open Editor →</div>
-          </Link>
         </div>
       </section>
 
@@ -234,7 +318,7 @@ export default function Home() {
           <div className="feature-item">
             <span className="feature-icon">🔒</span>
             <div>
-              <strong>Secure & Private</strong>
+              <strong>Secure &amp; Private</strong>
               <p>Files are processed locally and deleted after download.</p>
             </div>
           </div>

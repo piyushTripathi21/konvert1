@@ -7,6 +7,7 @@ const sharp = require('sharp');
 const { Document, Packer, Paragraph, TextRun, ImageRun } = require('docx');
 const { OUTPUT_DIR, cleanupPaths, outputFilename } = require('../utils/fileHelpers');
 const { parseRanges, addWatermark, addPageNumbers } = require('../utils/pdfHelpers');
+const { pdfToWordConvert, wordToPdfConvert, excelToPdfConvert } = require('../utils/wordComHelper');
 
 // Ensure output dir
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -21,135 +22,20 @@ async function pdfToWord(req, res, next) {
     const file = req.file;
     if (!file) return res.status(400).json({ error: 'Upload a PDF.' });
 
-    const pdfBytes = fs.readFileSync(file.path);
-    
-    // 1. Extract text using pdf-parse
-    let textContent = '';
-    try {
-      const data = await pdfParse(pdfBytes);
-      textContent = data.text || '';
-    } catch {
-      textContent = '';
-    }
-
-    // 2. Extract images via pdf-lib
-    const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-    const { PDFRawStream } = require('pdf-lib');
-    const zlib = require('zlib');
-    const images = [];
-
-    for (const [, obj] of pdfDoc.context.enumerateIndirectObjects()) {
-      if (!(obj instanceof PDFRawStream)) continue;
-
-      const dict = obj.dict;
-      const subtype = dict.get(PDFName.of('Subtype'));
-      if (!subtype || subtype.toString() !== '/Image') continue;
-
-      const filterObj = dict.get(PDFName.of('Filter'));
-      if (!filterObj) continue;
-      const filterStr = filterObj.toString();
-
-      try {
-        if (filterStr === '/DCTDecode') {
-          // JPEG
-          const jpegData = Buffer.from(obj.contents);
-          images.push(jpegData);
-        } else if (filterStr === '/FlateDecode') {
-          // Process raw image via sharp if it's 8-bit RGB
-          const width  = dict.get(PDFName.of('Width'))?.asNumber();
-          const height = dict.get(PDFName.of('Height'))?.asNumber();
-          const bpc    = dict.get(PDFName.of('BitsPerComponent'))?.asNumber() || 8;
-          const cs     = dict.get(PDFName.of('ColorSpace'))?.toString() || '';
-          
-          if (!width || !height || bpc !== 8) continue;
-          if (cs.includes('CMYK') || cs.includes('Indexed')) continue;
-          
-          const channels = cs.includes('Gray') ? 1 : 3;
-          const rawPixels = zlib.inflateSync(Buffer.from(obj.contents));
-          
-          if (rawPixels.length === width * height * channels) {
-            const pngBuf = await sharp(rawPixels, {
-              raw: { width, height, channels }
-            }).png().toBuffer();
-             images.push(pngBuf);
-          }
-        }
-      } catch {
-        // Skip corrupt/unsupported images
-      }
-    }
-
-    // 3. Assemble DOCX
-    const children = [];
-
-    // Add text paragraphs (split by double newline to preserve basic structure)
-    if (textContent.trim()) {
-      const paragraphs = textContent.split(/\n\s*\n/);
-      for (const p of paragraphs) {
-        if (!p.trim()) continue;
-        children.push(
-          new Paragraph({
-            children: [new TextRun(p.trim())],
-            spacing: { after: 200 }
-          })
-        );
-      }
-    } else {
-      children.push(
-        new Paragraph({
-          children: [new TextRun("No readable text found in PDF.")],
-          spacing: { after: 200 }
-        })
-      );
-    }
-
-    // Add extracted images at the end
-    // (A more advanced implementation would try to place them at their Y-coordinates,
-    // but appending them is the most reliable approach for a simple converter)
-    for (const imgBuffer of images) {
-       try {
-         // Determine dimensions (sharp can do this, but docx needs it explicitly.
-         // We'll give them a standard max width of 500px to avoid breaking the page)
-         const metadata = await sharp(imgBuffer).metadata();
-         const targetWidth = Math.min(metadata.width, 500);
-         const targetHeight = metadata.height * (targetWidth / metadata.width);
-
-         children.push(
-           new Paragraph({
-             children: [
-               new ImageRun({
-                 data: imgBuffer,
-                 transformation: {
-                   width: targetWidth,
-                   height: targetHeight,
-                 },
-               }),
-             ],
-             spacing: { before: 200, after: 200 },
-             alignment: 'center'
-           })
-         );
-       } catch {
-         // Skip image if docx rejects it
-       }
-    }
-
-    const doc = new Document({
-      sections: [{ children }],
-    });
-
-    const docxBuf = await Packer.toBuffer(doc);
     const outName = outputFilename('converted', '.docx');
     const outPath = path.join(OUTPUT_DIR, outName);
-    
-    fs.writeFileSync(outPath, docxBuf);
+
+    await pdfToWordConvert(file.path, outPath);
 
     res.set('X-Storage-Names', file.filename);
     res.download(outPath, outName, () => {
       cleanupPaths([outPath]);
     });
   } catch (err) {
-    next(err);
+    console.error('PDF to Word conversion failed:', err.message);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Conversion failed. Ensure Microsoft Word is installed.' });
+    }
   }
 }
 
@@ -735,6 +621,63 @@ function deleteFile(req, res) {
   }
 }
 
+/**
+ * POST /api/pdf/word-to-pdf
+ * Convert a Word (.docx) file into a PDF.
+ */
+async function wordToPdf(req, res, next) {
+  try {
+    const file = req.file;
+    if (!file) return res.status(400).json({ error: 'Upload a Word file (.docx).' });
+
+    const outName = outputFilename('converted', '.pdf');
+    const outPath = path.join(OUTPUT_DIR, outName);
+
+    await wordToPdfConvert(file.path, outPath);
+
+    res.set('X-Storage-Names', file.filename);
+    res.download(outPath, outName, () => {
+      cleanupPaths([outPath]);
+    });
+  } catch (err) {
+    console.error('Word to PDF conversion failed:', err.message);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Conversion failed. Ensure Microsoft Word is installed.' });
+    }
+  }
+}
+
+/**
+ * POST /api/pdf/excel-to-pdf
+ * Convert an Excel (.xlsx, .xls, .csv) file into a PDF table.
+ */
+async function excelToPdf(req, res, next) {
+  try {
+    const file = req.file;
+    if (!file) return res.status(400).json({ error: 'Upload an Excel file.' });
+
+    const outName = outputFilename('converted', '.pdf');
+    const outPath = path.join(OUTPUT_DIR, outName);
+
+    // Call the native Excel COM converter to ensure perfect layout and unicode character (like lambda) preservation
+    await excelToPdfConvert(file.path, outPath);
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${outName}"`,
+      'X-Storage-Names': file.filename,
+    });
+    res.download(outPath, outName, () => {
+      cleanupPaths([outPath]);
+    });
+  } catch (err) {
+    console.error('Excel to PDF conversion failed:', err.message);
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Conversion failed. Ensure Microsoft Excel is installed.' });
+    }
+  }
+}
+
 // --- Helper: Create ZIP from directory ---
 function createZip(sourceDir, outPath) {
   return new Promise((resolve, reject) => {
@@ -766,4 +709,6 @@ module.exports = {
   extractItems,
   editMetadata,
   deleteFile,
+  wordToPdf,
+  excelToPdf,
 };

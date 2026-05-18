@@ -43,6 +43,24 @@ function imgFilter(req, file, cb) {
   }
 }
 
+function wordFilter(req, file, cb) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (['.docx'].includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only Word files (.docx) are allowed'), false);
+  }
+}
+
+function excelFilter(req, file, cb) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (['.xlsx', '.xls', '.csv'].includes(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only Excel files (.xlsx, .xls, .csv) are allowed'), false);
+  }
+}
+
 // Pre-configured upload instances for common use cases
 const uploadPdf = (subdir) =>
   multer({
@@ -58,6 +76,20 @@ const uploadImages = (subdir) =>
     fileFilter: imgFilter,
   });
 
+const uploadWord = (subdir) =>
+  multer({
+    storage: createStorage(subdir),
+    limits: { fileSize: MAX_FILE_SIZE },
+    fileFilter: wordFilter,
+  });
+
+const uploadExcel = (subdir) =>
+  multer({
+    storage: createStorage(subdir),
+    limits: { fileSize: MAX_FILE_SIZE },
+    fileFilter: excelFilter,
+  });
+
 const uploadAny = (subdir) =>
   multer({
     storage: createStorage(subdir),
@@ -67,6 +99,8 @@ const uploadAny = (subdir) =>
 module.exports = {
   uploadPdf,
   uploadImages,
+  uploadWord,
+  uploadExcel,
   uploadAny,
   MAX_FILE_SIZE,
 };

@@ -424,6 +424,17 @@ export default function PdfEditor() {
         fc[k] = await doc.embedFont(FONT_MAP[k]);
       }
 
+      // Helper: parse color from hex (#rrggbb) OR css rgb(r,g,b)
+      const parseColor = (c) => {
+        if (!c || c === 'transparent') return null;
+        if (c.startsWith('rgb')) {
+          const m = c.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+          if (m) return { r: +m[1] / 255, g: +m[2] / 255, b: +m[3] / 255 };
+          return { r: 1, g: 1, b: 1 }; // fallback white
+        }
+        return hexToRgb(c);
+      };
+
       const pp = doc.getPages();
       for (const el of elements) {
         const page = pp[el.pageIdx];
@@ -476,7 +487,8 @@ export default function PdfEditor() {
             color: fill ? rgb(fill.r, fill.g, fill.b) : undefined
           });
         } else if (el.type === 'whiteout') {
-          page.drawRectangle({ x: el.x * sx, y: ph - (el.y + el.h) * sy, width: el.w * sx, height: el.h * sy, color: rgb(1, 1, 1) });
+          const wc = parseColor(el.fillColor) || { r: 1, g: 1, b: 1 };
+          page.drawRectangle({ x: el.x * sx, y: ph - (el.y + el.h) * sy, width: el.w * sx, height: el.h * sy, color: rgb(wc.r, wc.g, wc.b) });
         } else if (el.type === 'highlight') {
           const { r, g, b } = hexToRgb(el.color || '#ffff00');
           page.drawRectangle({ x: el.x * sx, y: ph - (el.y + el.h) * sy, width: el.w * sx, height: el.h * sy, color: rgb(r, g, b), opacity: 0.35 });
@@ -486,10 +498,15 @@ export default function PdfEditor() {
       }
 
       const out = await doc.save();
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([out], { type: 'application/pdf' }));
+      a.href = url;
       a.download = pdfFile ? pdfFile.name.replace('.pdf', '_edited.pdf') : 'edited.pdf';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       alert('Save failed: ' + err.message);
     }

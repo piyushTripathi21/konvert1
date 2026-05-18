@@ -117,26 +117,55 @@
   }
 }
 
-/* Edit PDF link card */
-.edit-pdf-link {
+/* Tool card links on homepage */
+.tool-card-link {
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  color: inherit;
 }
 
-.edit-pdf-badge {
-  margin-top: auto;
-  padding: 8px 16px;
-  background: #8e44ad;
+.tool-card-link:hover {
+  text-decoration: none;
+}
+
+.tool-card-arrow {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  color: var(--card-color, var(--accent));
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.25s ease;
+}
+
+.tool-card-link:hover .tool-card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* AI Tool Cards */
+.tool-card-ai {
+  background: linear-gradient(135deg, #f8f7ff 0%, #fff 100%);
+  border-color: #d6d0f7;
+}
+
+.tool-card-ai:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+}
+
+.tool-ai-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: #fff;
-  border-radius: 8px;
+  font-size: 0.68rem;
   font-weight: 700;
-  font-size: 0.85rem;
-  text-align: center;
-  transition: all 0.2s ease;
-}
-
-.edit-pdf-link:hover .edit-pdf-badge {
-  filter: brightness(0.92);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(142, 68, 173, 0.25);
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.3px;
 }
 

@@ -1,2 +1,45 @@
-node_modules
+# Dependency Directories
+node_modules/
+jspm_packages/
+web_modules/
+
+# Environment and Secrets
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Local Uploads and Conversions (Security / Privacy)
+server/uploads/**/*
+!server/uploads/.gitkeep
+server/output/**/*
+!server/output/.gitkeep
+
+# Build Directories
+client/dist/
+client/build/
+dist/
+build/
+
+# Logs and Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+logs/
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# Test Scripts and Temporary Files
+server/test-docx.js
+test.csv
+test_excel.js
+test_excel_com.ps1
+test_fit.ps1
+test_gridlines.ps1
+*.tmp
+*.temp
