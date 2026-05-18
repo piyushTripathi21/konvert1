@@ -12,10 +12,10 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Set up Python virtual environment and install pdf2docx layout reconstruction engine
+# Set up Python virtual environment and install pdf2docx and openpyxl packages
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir pdf2docx
+RUN pip install --no-cache-dir pdf2docx openpyxl
 
 # Create app directory
 WORKDIR /app

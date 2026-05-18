@@ -107,6 +107,19 @@ async function libreOfficeConvert(inputPath, outputPath) {
   const absOutputDir = path.dirname(path.resolve(outputPath));
   const filename = path.basename(absInput);
 
+  // If it is an Excel file (.xlsx), run our python gridline enabler first!
+  const ext = path.extname(filename).toLowerCase();
+  if (ext === '.xlsx') {
+    try {
+      const pythonCmd = IS_WINDOWS ? 'python' : 'python3';
+      const pyScript = path.resolve(__dirname, 'enable_gridlines.py');
+      await execPromise(`"${pythonCmd}" "${pyScript}" "${absInput}"`);
+      console.log('[Office] Successfully enabled Calc gridlines inside spreadsheet.');
+    } catch (err) {
+      console.warn('[Office] Failed to enable Calc gridlines:', err.message);
+    }
+  }
+
   // Command to invoke headless LibreOffice
   // Runs perfectly on Render, AWS Linux, and Docker containers
   const cmd = `libreoffice --headless --convert-to pdf --outdir "${absOutputDir}" "${absInput}"`;
