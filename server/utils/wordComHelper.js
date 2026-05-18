@@ -111,12 +111,21 @@ async function libreOfficeConvert(inputPath, outputPath) {
   const ext = path.extname(filename).toLowerCase();
   if (ext === '.xlsx') {
     try {
-      const pythonCmd = IS_WINDOWS ? 'python' : 'python3';
+      let pythonCmd = IS_WINDOWS ? 'python' : 'python3';
+      // Fallback directly to the Docker virtual environment python path if it exists
+      if (!IS_WINDOWS && fs.existsSync('/opt/venv/bin/python3')) {
+        pythonCmd = '/opt/venv/bin/python3';
+      } else if (!IS_WINDOWS && fs.existsSync('/opt/venv/bin/python')) {
+        pythonCmd = '/opt/venv/bin/python';
+      }
+      
       const pyScript = path.resolve(__dirname, 'enable_gridlines.py');
       await execPromise(`"${pythonCmd}" "${pyScript}" "${absInput}"`);
-      console.log('[Office] Successfully enabled Calc gridlines inside spreadsheet.');
+      console.log('[Office] Successfully enabled Calc gridlines & page-fit scaling inside spreadsheet.');
     } catch (err) {
-      console.warn('[Office] Failed to enable Calc gridlines:', err.message);
+      console.warn('[Office] Failed to enable Calc gridlines and scaling. Command error:', err.message);
+      if (err.stdout) console.warn('Command stdout:', err.stdout);
+      if (err.stderr) console.warn('Command stderr:', err.stderr);
     }
   }
 
@@ -222,7 +231,12 @@ async function pdfToWordConvert(inputPath, outputPath) {
 
   return new Promise((resolve, reject) => {
     // Detect python executable name (python3 on Linux, python on Windows)
-    const pythonCmd = IS_WINDOWS ? 'python' : 'python3';
+    let pythonCmd = IS_WINDOWS ? 'python' : 'python3';
+    if (!IS_WINDOWS && fs.existsSync('/opt/venv/bin/python3')) {
+      pythonCmd = '/opt/venv/bin/python3';
+    } else if (!IS_WINDOWS && fs.existsSync('/opt/venv/bin/python')) {
+      pythonCmd = '/opt/venv/bin/python';
+    }
     const pyCommand = `from pdf2docx import Converter; cv = Converter(r"${absInput}"); cv.convert(r"${absOutput}"); cv.close()`;
     
     const child = spawn(pythonCmd, ['-c', pyCommand], {
