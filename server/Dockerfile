@@ -9,6 +9,9 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     libreoffice \
     fonts-liberation \
+    fonts-dejavu \
+    fonts-carlito \
+    fonts-caladea \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
