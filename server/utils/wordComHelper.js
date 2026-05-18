@@ -201,6 +201,7 @@ async function excelToPdfConvert(inputPath, outputPath) {
     '}',
     '$excel.DisplayAlerts = $false',
     `$wb = $excel.Workbooks.Open("${absInput}", $false, $true)`,
+    '$wb.Worksheets | ForEach-Object { $_.Cells.EntireColumn.AutoFit() }',
     '$wb.Worksheets | ForEach-Object { $_.PageSetup.PrintGridlines = $true }',
     '$wb.Worksheets | ForEach-Object { $_.PageSetup.Zoom = $false; $_.PageSetup.FitToPagesWide = 1; $_.PageSetup.FitToPagesTall = 1 }',
     `$wb.ExportAsFixedFormat(0, "${absOutput}")`,

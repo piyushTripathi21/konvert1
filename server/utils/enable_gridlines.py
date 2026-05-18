@@ -14,6 +14,7 @@ def main():
     try:
         import openpyxl
         from openpyxl.styles import Border, Side
+        from openpyxl.utils import get_column_letter
         
         # Define a high-fidelity light-gray side border representing Excel gridlines
         grid_side = Side(style='thin', color='D3D3D3')
@@ -47,7 +48,20 @@ def main():
             except Exception as e:
                 print(f"Warning (borders): {e}")
                 
-            # 4. Force scaling to fit exactly 1 page wide and 1 page tall
+            # 4. Autofit column widths to prevent text truncation (no ### or clipped words!)
+            try:
+                for col in sheet.columns:
+                    max_len = 0
+                    col_letter = get_column_letter(col[0].column)
+                    for cell in col:
+                        if cell.value is not None:
+                            max_len = max(max_len, len(str(cell.value)))
+                    # Assign dynamically calculated column width with slight margin
+                    sheet.column_dimensions[col_letter].width = max(max_len + 3, 11)
+            except Exception as e:
+                print(f"Warning (autofit): {e}")
+                
+            # 5. Force scaling to fit exactly 1 page wide and 1 page tall
             try:
                 if not sheet.sheet_properties.pageSetUpPr:
                     sheet.sheet_properties.pageSetUpPr = openpyxl.worksheet.properties.PageSetupProperties(fitToPage=True)
