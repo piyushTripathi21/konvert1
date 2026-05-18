@@ -129,15 +129,17 @@ async function libreOfficeConvert(inputPath, outputPath) {
     }
   }
 
-  // Command to invoke headless LibreOffice with custom UserInstallation to prevent write lock/permission crashes in Docker
-  const cmd = `libreoffice "-env:UserInstallation=file:///tmp/libreoffice-profile" --headless --convert-to pdf --outdir "${absOutputDir}" "${absInput}"`;
+  // Command to invoke headless LibreOffice with low-memory and speed-optimized parameters
+  // Essential for Render's 512MB RAM Free Tier to prevent Out of Memory (OOM) crashes
+  const cmd = `libreoffice --headless --invisible --nodefault --nofirststartwizard --nolockcheck --nologo --norestore --convert-to pdf --outdir "${absOutputDir}" "${absInput}"`;
 
   try {
     await execPromise(cmd);
 
-    // LibreOffice names output files automatically by taking the base name without extension and appending .pdf
-    const nameWithoutExt = path.basename(absInput, path.extname(absInput));
-    const defaultOutPath = path.join(absOutputDir, `${nameWithoutExt}.pdf`);
+    // LibreOffice names output files automatically based on input file base name
+    const inputExt = path.extname(filename);
+    const defaultOutName = filename.replace(inputExt, '.pdf');
+    const defaultOutPath = path.join(absOutputDir, defaultOutName);
 
     if (fs.existsSync(defaultOutPath)) {
       if (path.resolve(defaultOutPath) !== path.resolve(outputPath)) {

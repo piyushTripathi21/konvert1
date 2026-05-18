@@ -671,9 +671,9 @@ async function excelToPdf(req, res, next) {
       cleanupPaths([outPath]);
     });
   } catch (err) {
-    console.error('Excel to PDF conversion failed:', err.message);
+    console.error('Excel to PDF conversion failed:', err.stack || err.message);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Conversion failed. Ensure Microsoft Excel is installed.' });
+      res.status(500).json({ error: `Excel to PDF conversion failed: ${err.message}` });
     }
   }
 }
