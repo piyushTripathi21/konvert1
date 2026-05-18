@@ -107,6 +107,7 @@ async function libreOfficeConvert(inputPath, outputPath) {
   const absOutputDir = path.dirname(path.resolve(outputPath));
   const filename = path.basename(absInput);
 
+  const ext = path.extname(filename).toLowerCase();
   let currentInput = absInput;
   let currentExt = ext;
   let tempXlsxCreated = false;
