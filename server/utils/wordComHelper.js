@@ -25,12 +25,12 @@ function ensureTrustedLocations() {
       { name: 'KonvertUploads', path: path.resolve(UPLOAD_DIR) },
       { name: 'KonvertOutput', path: path.resolve(OUTPUT_DIR) }
     ];
-    
+
     const officeVersions = ['16.0', '15.0'];
     const commands = [
       "$ErrorActionPreference = 'SilentlyContinue'"
     ];
-    
+
     pathsToTrust.forEach(item => {
       const safePath = item.path.replace(/\\/g, '\\\\');
       officeVersions.forEach(v => {
@@ -49,7 +49,7 @@ function ensureTrustedLocations() {
         commands.push(`Set-ItemProperty -Path '${excelReg}' -Name 'Description' -Value 'Konvert App Folder' -Force`);
       });
     });
-    
+
     const psScript = commands.join('; ');
     execSync(`powershell -NoProfile -ExecutionPolicy Bypass -Command "${psScript}"`, { windowsHide: true });
     console.log('[OfficeCOM] Configured uploads and output folders in Word & Excel Trust Center Settings.');
@@ -118,7 +118,7 @@ async function libreOfficeConvert(inputPath, outputPath) {
       } else if (!IS_WINDOWS && fs.existsSync('/opt/venv/bin/python')) {
         pythonCmd = '/opt/venv/bin/python';
       }
-      
+
       const pyScript = path.resolve(__dirname, 'enable_gridlines.py');
       await execPromise(`"${pythonCmd}" "${pyScript}" "${absInput}"`);
       console.log('[Office] Successfully enabled Calc gridlines & page-fit scaling inside spreadsheet.');
@@ -238,7 +238,7 @@ async function pdfToWordConvert(inputPath, outputPath) {
       pythonCmd = '/opt/venv/bin/python';
     }
     const pyCommand = `from pdf2docx import Converter; cv = Converter(r"${absInput}"); cv.convert(r"${absOutput}"); cv.close()`;
-    
+
     const child = spawn(pythonCmd, ['-c', pyCommand], {
       stdio: ['ignore', 'pipe', 'pipe'],
       windowsHide: true,
