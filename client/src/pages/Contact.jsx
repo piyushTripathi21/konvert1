@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import SEOHelmet from '../components/seo/SEOHelmet';
 import './Contact.css';
 
 export default function Contact() {
@@ -51,6 +52,12 @@ export default function Contact() {
 
   return (
     <div className="contact-page-container">
+      <SEOHelmet
+        title="Contact Us"
+        description="Get in touch with the Konvert team. Email us at konvert.dev@gmail.com or WhatsApp us at +91 70556 67769. We respond within 2 hours."
+        keywords="contact konvert, konvert support, konvert email, konvert whatsapp"
+        canonical="/contact"
+      />
       {/* Hero Section */}
       <section className="contact-hero">
         <div className="contact-hero-content">

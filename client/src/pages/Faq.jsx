@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEOHelmet from '../components/seo/SEOHelmet';
 import './Faq.css';
 
 const FAQ_DATA = [
@@ -200,6 +201,12 @@ export default function Faq() {
 
   return (
     <div className="faq-page-container">
+      <SEOHelmet
+        title="FAQ — Frequently Asked Questions"
+        description="Got questions about Konvert? Find answers about file security, privacy, PDF tools, AI features, conversions, and more in our comprehensive FAQ section."
+        keywords="konvert faq, pdf tool help, how to merge pdf, how to compress pdf, pdf security, ai pdf questions"
+        canonical="/faq"
+      />
       {/* Hero */}
       <section className="faq-hero">
         <div className="faq-hero-content">

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import SEOHelmet from '../components/seo/SEOHelmet';
 import './About.css';
 
 export default function About() {
@@ -9,6 +10,12 @@ export default function About() {
 
   return (
     <div className="about-page-container">
+      <SEOHelmet
+        title="About Us — Our Story & Team"
+        description="Learn about Konvert — built by co-founders Piyush Tripathi and Pradeep Gupta to make document management effortless, free, and private for everyone."
+        keywords="about konvert, konvert team, piyush tripathi, pradeep gupta, pdf tool india"
+        canonical="/about"
+      />
       {/* Hero Section */}
       <section className="about-hero">
         <div className="about-hero-content">

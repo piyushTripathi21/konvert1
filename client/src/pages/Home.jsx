@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import SEOHelmet from '../components/seo/SEOHelmet';
 import './Home.css';
 
 const tools = [
@@ -379,6 +380,12 @@ export default function Home() {
 
   return (
     <>
+      <SEOHelmet
+        title="Free Online PDF & Image Toolkit"
+        description="Konvert offers 20+ free PDF tools — merge, split, compress, rotate, protect, watermark, convert PDF to Word/Excel, AI summarizer, AI translator, chat with PDF, and image editor. No signup needed."
+        keywords="free pdf tools online, merge pdf free, split pdf online, compress pdf, pdf to word converter, word to pdf, ai pdf summarizer, chat with pdf, image background remover, konvert"
+        canonical="/"
+      />
       {/* Hero */}
       <section className="hero">
         <div className="hero-container">

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Block any internal/API paths
+Disallow: /api/
+Disallow: /uploads/
+
+# Sitemap location
+Sitemap: https://konvert1.vercel.app/sitemap.xml
