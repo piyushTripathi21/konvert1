@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Header      from './components/layout/Header';
 import Footer      from './components/layout/Footer';
+import CookieBanner from './components/layout/CookieBanner';
 import Home        from './pages/Home';
 import MergePdf    from './pages/MergePdf';
 import PdfToWord   from './pages/PdfToWord';
@@ -67,8 +68,8 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
+        <CookieBanner />
       </Router>
     </HelmetProvider>
   );
 }
-
